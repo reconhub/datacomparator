@@ -1,0 +1,12 @@
+Package: datacomparator
+Title: datacomparator
+Version: 0.0.0.9000
+Authors@R: person('Paul', 'Campbell', email = 'paul.campbell@epicentre.msf.org', role = c('cre', 'aut'))
+Description: Shiny app to provide a shiny app for comparing different (dated) versions of a given dataset.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    shiny, 
+    golem
+RoxygenNote: 6.1.0

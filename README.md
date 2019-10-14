@@ -21,4 +21,6 @@ versions of a given dataset. The app will allow:
 This project is currently only a concept. We are currently looking for
 volunteers to help :)
  
-
+Please note that the 'datacomparator' project is released with a
+[Contributor Code of Conduct](CODE_OF_CONDUCT.md).
+By contributing to this project, you agree to abide by its terms.
