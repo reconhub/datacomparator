@@ -1,6 +1,10 @@
 
 ## Welcome to the *datacomparator* project
 
+<!-- badges: start -->
+  [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+<!-- badges: end -->
+
 This project aims to provide a shiny app for comparing different (dated)
 versions of a given dataset. The app will allow:
 
@@ -14,12 +18,12 @@ versions of a given dataset. The app will allow:
 
 * to visualise **changes in duplicates**
 
-
-
 ## Contributors
 
 This project is currently only a concept. We are currently looking for
 volunteers to help :)
+
+---
  
 Please note that the 'datacomparator' project is released with a
 [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
