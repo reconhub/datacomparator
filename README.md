@@ -8,7 +8,7 @@ versions of a given dataset. The app will allow:
 
 * to compare **data structures** using [`linelist::compare_data()`](https://www.repidemicsconsortium.org/linelist/reference/compare_data.html)
 
-* to visualise **changes in data entries** using `compareDF::compare_df`
+* to visualise **changes in data entries** using [`compareDF::compare_df()`](https://github.com/alexsanjoseph/compareDF)
 
 * to identify **duplicates** in *old* and *new* data
 
