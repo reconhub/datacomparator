@@ -3,19 +3,32 @@ app_ui <- function() {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
-    # List the first level UI elements here 
-    navbarPage(
-      id = "tabs",
-      position = "fixed-top",
+    
+    tags$header(
+      class = "navbar navbar-default navbar-static-top",
+      tags$div(
+        class = "container-fluid",
+        tags$div(
+          class = "navbar-header",
+          tags$div(class = "navbar-brand", HTML("<b>RECON</b> <i>datacomparator</i>"))
+        ),
+        # Place to add links on right hand side of navbar if required
+        tags$ul(
+          class = "nav navbar-nav navbar-right",
+          tags$li(),
+          tags$li()
+        )
+      )
+    ),
+    
+    fluidPage(
+      theme = shinythemes::shinytheme("simplex"),
       title = "RECON datacomparator",
-      #theme = shinytheme("sandstone"),
-      collapsible = TRUE,
-      
-      tabPanel("", icon = icon("home"), mod_data_import_ui("data_import_ui_1"),
-               verbatimTextOutput("dt"))
-      
+      mod_compare_data_ui("compare_data_ui_1")
     )
+    
   )
+    
 }
 
 #' @import shiny

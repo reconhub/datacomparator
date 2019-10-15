@@ -1,5 +1,9 @@
 #' @import shiny
 app_server <- function(input, output,session) {
   # List the first level callModules here
-  data <- callModule(mod_data_import_server, "data_import_ui_1")
+  callModule(mod_compare_data_server, "compare_data_ui_1")
+  
+  observeEvent(input$browser,{
+    browser()
+  })
 }

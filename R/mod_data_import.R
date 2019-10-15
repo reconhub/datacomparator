@@ -16,35 +16,38 @@
 mod_data_import_ui <- function(id){
   ns <- NS(id)
   tagList(
-
-    fluidRow(
-      column(width = 8, shiny::wellPanel(includeMarkdown(here::here("README.md")))),
-      column(
-        width = 4, 
-        wellPanel(
-          fileInput(ns("new_data"), "New Data File",
-                    accept = c(".xlsx", ".xls", ".csv"),
-                    placeholder = "Excel or CSV file"),
-          
-          fileInput(ns("old_data"), "Old Data File",
-                    accept = c(".xlsx", ".xls", ".csv"),
-                    placeholder = "Excel or CSV file"),
-          
-          tags$hr(),
-          
-          shinyjs::disabled(
-            actionButton(ns("go"), "Compare Data", class = "btn-primary", icon = icon("not-equal"))
+    column(
+      width = 4, 
+      wellPanel(
+        fileInput(ns("new_data"), "New Data File",
+                  accept = c(".xlsx", ".xls", ".csv"),
+                  placeholder = "Excel or CSV file"),
+        
+        fileInput(ns("old_data"), "Old Data File",
+                  accept = c(".xlsx", ".xls", ".csv"),
+                  placeholder = "Excel or CSV file"),
+        
+        shinyjs::hidden(
+          div(id = ns("hidden_inputs"),
+            selectizeInput(ns("date_var"), "Select Date Column", choices = ""),
+            numericInput(ns("n_days"), "Number of days to compare", value = 42, min = 1, step = 1)
           )
+        ),
+        
+        tags$hr(),
+        
+        shinyjs::disabled(
+          actionButton(ns("go"), "Compare Data", class = "btn-primary", icon = icon("not-equal"))
         )
       )
     )
-    
   )
 }
     
 # Module Server
     
 #' @rdname mod_data_import
+#' @importFrom magrittr %>%
 #' @export
 #' @keywords internal
     
@@ -52,7 +55,8 @@ mod_data_import_server <- function(input, output, session){
   ns <- session$ns
   
   imported_data <- reactiveValues(new_data = NULL, new_data_date = NULL,
-                                  old_data = NULL, old_data_date = NULL)
+                                  old_data = NULL, old_data_date = NULL,
+                                  launch_modules = 0)
   
   observeEvent(input$new_data, {
     inFile <- input$new_data
@@ -69,6 +73,8 @@ mod_data_import_server <- function(input, output, session){
     
     imported_data$new_data <- df
     imported_data$new_data_date <- linelist::guess_dates(inFile$name)
+    
+    updateSelectizeInput(session, "date_var", choices = c("Select date column to clean" = "", names(df)))
   })
   
   observeEvent(input$old_data, {
@@ -89,17 +95,40 @@ mod_data_import_server <- function(input, output, session){
   })
   
   observe({
-    shinyjs::toggleState(
-      id = "go", 
+    shinyjs::toggle(
+      id = "hidden_inputs", anim = TRUE,
       condition = (!is.null(imported_data$new_data) & !is.null(imported_data$old_data))
     )
+  })
+  
+  observe({
+    shinyjs::toggleState(id = "go", 
+                         condition = (!is.null(imported_data$new_data) & 
+                                        !is.null(imported_data$old_data) &
+                                        input$date_var != "")
+                         )
+  })
+  
+  # when button is clicked, clean and filter data based on inputs
+  observeEvent(input$go, {
+    date_var <- rlang::sym(input$date_var)
+    start_at <- imported_data$new_data_date - input$n_days
+    
+    imported_data$new_data <- imported_data$new_data %>%
+      dplyr::mutate(date_report = linelist::guess_dates(!!date_var)) %>% 
+      dplyr::filter(date_report >= start_at)
+    
+    imported_data$old_data <- imported_data$old_data %>%
+      dplyr::mutate(date_report = linelist::guess_dates(!!date_var)) %>% 
+      dplyr::filter(date_report >= start_at)
+    
+    imported_data$launch_modules <- input$go
   })
   
   # return data and datestamps to server
   reactive({
     reactiveValuesToList(imported_data)
   })
-  
   
 }
     

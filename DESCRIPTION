@@ -13,5 +13,8 @@ Imports:
     compareDF,
     readr,
     readxl,
-    shinyjs
+    shinyjs,
+    dplyr,
+    DT,
+    shinythemes
 RoxygenNote: 6.1.1
