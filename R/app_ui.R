@@ -15,7 +15,7 @@ app_ui <- function() {
         # Place to add links on right hand side of navbar if required
         tags$ul(
           class = "nav navbar-nav navbar-right",
-          tags$li(),
+          tags$li(tags$a(icon("github"), href = "https://github.com/reconhub/datacomparator", target = "_blank")),
           tags$li()
         )
       )

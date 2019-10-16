@@ -17,10 +17,12 @@ mod_compare_data_ui <- function(id){
   ns <- NS(id)
   tagList(
       sidebarLayout(
+        position = "right",
+        
         sidebarPanel(
-          width = 3,
+          width = 3, 
           
-          tags$h3("Inputs"),
+          helpText("Inputs"),
           tags$hr(),
           
           fileInput(ns("new_data"), "New Data File",
@@ -48,6 +50,7 @@ mod_compare_data_ui <- function(id){
         ),
         
         mainPanel(
+          width = 9,
           tabsetPanel(
             id = ns("tabs"), 
             tabPanel(
@@ -167,7 +170,8 @@ mod_compare_data_server <- function(input, output, session){
         inputId = "tabs",
         tabPanel(
           title = "compareDF::compare_df", #icon = icon("home"),
-          htmlOutput(ns("compareDF"))
+          column(width = 4, includeMarkdown(system.file("app", "www", "colour_guide.md", package = "datacomparator"))),
+          column(width = 8, htmlOutput(ns("compareDF")))
         )
       )
       
@@ -191,7 +195,8 @@ mod_compare_data_server <- function(input, output, session){
         inputId = "tabs",
         tabPanel(
           title = "Compare duplicates", #icon = icon("home"),
-          htmlOutput(ns("compare_dups"))
+          column(width = 4, includeMarkdown(system.file("app", "www", "colour_guide.md", package = "datacomparator"))),
+          column(width = 8, htmlOutput(ns("compare_dups")))
         )
       )
     } else if (input$go > 1) {
@@ -235,17 +240,17 @@ mod_compare_data_server <- function(input, output, session){
   })
   
   output$od_dups <- DT::renderDT({
-    validate(
-      need(row(duplicates_old()) > 0, "No duplicates found in old data set.")
-    )
+    # validate(
+    #   need(row(duplicates_old()) > 0, "No duplicates found in old data set.")
+    # )
 
     DT::datatable(duplicates_old(), options = list(scrollX = TRUE))
   })
 
   output$nd_dups <- DT::renderDT({
-    validate(
-      need(row(duplicates_new()) > 0, "No duplicates found in new data set.")
-    )
+    # validate(
+    #   need(row(duplicates_new()) > 0, "No duplicates found in new data set.")
+    # )
 
     DT::datatable(duplicates_new(), options = list(scrollX = TRUE))
   })
