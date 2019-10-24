@@ -12,7 +12,7 @@ golem::add_module( name = "compare_data" ) # Name of the module
 
 ## 2.2 Add dependencies
 
-usethis::use_package( "shinythemes" ) # To call each time you need a new package
+usethis::use_package( "shinycssloaders" ) # To call each time you need a new package
 
 ## 2.3 Add tests
 
