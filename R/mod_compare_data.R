@@ -20,7 +20,7 @@ mod_compare_data_ui <- function(id){
       position = "right",
       
       sidebarPanel(
-        width = 3, 
+        width = 3, style = "margin-top: 40px;",
         
         helpText("Inputs"),
         tags$hr(),
@@ -34,11 +34,25 @@ mod_compare_data_ui <- function(id){
                   placeholder = "Excel or CSV file"),
         
         shinyjs::hidden(
-          div(id = ns("hidden_inputs"),
-              selectizeInput(ns("id_var"), "Select ID Column", choices = ""),
-              selectizeInput(ns("date_var"), "Select Date Column", choices = ""),
-              selectizeInput(ns("keep_vars"), "Select other columns to compare", choices = "", multiple = TRUE),
-              numericInput(ns("n_days"), "Max days to compare", value = 42, min = 1, step = 1)
+          div(
+            id = ns("hidden_inputs"),
+            selectizeInput(ns("id_var"), "Select ID Column", choices = "", multiple = FALSE),
+            shinyWidgets::pickerInput(
+              ns("keep_vars"), 
+              "Select other columns to compare", 
+              choices = "", 
+              options = list(
+                `actions-box` = TRUE,
+                `selected-text-format` = "count > 3",
+                `count-selected-text` = "{0} selected",
+                style = "btn-light",
+                showTick = TRUE
+              ),
+              multiple = TRUE
+            ),
+            checkboxInput(ns("show_date"), "If data contains dates, limit number of days to compare?", value = FALSE),
+            selectizeInput(ns("date_var"), "Select Date Column", choices = ""),
+            numericInput(ns("n_days"), "Max days to compare", value = 42, min = 1, step = 1)
           )
         ),
         
@@ -106,8 +120,8 @@ mod_compare_data_server <- function(input, output, session){
     imported_data$new_data_raw <- df
     imported_data$new_data_date <- linelist::guess_dates(inFile$name)
     
+    updateSelectizeInput(session, "id_var", choices = c("Column to identify duplicates" = "", names(df)))
     updateSelectizeInput(session, "date_var", choices = c("Select date column to clean" = "", names(df)))
-    updateSelectizeInput(session, "id_var", choices = c("Select case ID column" = "", names(df)))
   })
   
   # updated choices of input$keep_vars with colnames of new data file minus 
@@ -115,8 +129,8 @@ mod_compare_data_server <- function(input, output, session){
   
   observe({
     choices <- names(imported_data$new_data_raw)
-    choices <- choices[!choices %in% c(input$id_var, input$date_var)]
-    updateSelectizeInput(session, "keep_vars", choices = choices)
+    choices <- choices[!choices %in% c(input$id_var)]
+    shinyWidgets::updatePickerInput(session, "keep_vars", choices = choices)
   })
   
   # when old data file is uploaded read it into R and save to imported_data$old_data_raw reactive value
@@ -152,6 +166,16 @@ mod_compare_data_server <- function(input, output, session){
     )
   })
   
+  observeEvent(input$show_date, {
+    if(input$show_date) {
+      shinyjs::show(id = "date_var", anim = TRUE)
+      shinyjs::show(id = "n_days", anim = TRUE)
+    } else {
+      shinyjs::hide(id = "date_var", anim = TRUE)
+      shinyjs::hide(id = "n_days", anim = TRUE)
+    }
+  })
+  
   # when data and inputs have been filled, show the compare data button
   
   observe({
@@ -159,8 +183,9 @@ mod_compare_data_server <- function(input, output, session){
       id = "go", 
       condition = (!is.null(imported_data$new_data_raw) & 
                      !is.null(imported_data$old_data_raw) &
-                     input$date_var != "" &
-                     input$id_var != "")
+                     length(input$id_var) &
+                     input$id_var != "" 
+      )
     )
   })
   
@@ -171,21 +196,25 @@ mod_compare_data_server <- function(input, output, session){
   # when compare button is clicked, clean and filter data based on inputs
   
   observeEvent(input$go, {
-    date_var <- rlang::sym(input$date_var)
     id_var <- rlang::sym(input$id_var)
-    start_at <- imported_data$new_data_date - input$n_days
     
-    imported_data$new_data <- imported_data$new_data_raw %>%
-      dplyr::mutate(id = !!id_var) %>% 
-      dplyr::mutate(date = linelist::guess_dates(!!date_var)) %>% 
-      dplyr::filter(date >= start_at) %>% 
-      dplyr::select("id", "date", input$keep_vars)
+    df_new <- imported_data$new_data_raw %>% dplyr::mutate(id = !!id_var)
     
-    imported_data$old_data <- imported_data$old_data_raw %>%
-      dplyr::mutate(id = !!id_var) %>% 
-      dplyr::mutate(date = linelist::guess_dates(!!date_var)) %>% 
-      dplyr::filter(date >= start_at) %>% 
-      dplyr::select("id", "date", input$keep_vars)
+    df_old <- imported_data$old_data_raw %>% dplyr::mutate(id = !!id_var) 
+    
+    if (length(input$date_var) & input$date_var != "") {
+      date_var <- rlang::sym(input$date_var)
+      df_new <- df_new %>% dplyr::mutate(date = linelist::guess_dates(!!date_var))
+      df_old <- df_old %>% dplyr::mutate(date = linelist::guess_dates(!!date_var))
+      if (length(input$n_days)) {
+        start_at <- imported_data$new_data_date - input$n_days
+        df_new <- df_new %>% dplyr::filter(date >= start_at) 
+        df_old <- df_old %>% dplyr::filter(date >= start_at) 
+      }
+    }
+    
+    imported_data$new_data <- df_new %>% dplyr::select("id", input$keep_vars)
+    imported_data$old_data <- df_old %>% dplyr::select("id", input$keep_vars)
   })
   
   # ==============================================================================
@@ -201,7 +230,7 @@ mod_compare_data_server <- function(input, output, session){
       appendTab(
         inputId = "tabs",
         tabPanel(
-          title = "linelist::compare_data", #icon = icon("home"),
+          title = "Summary", #icon = icon("home"),
           shiny::verbatimTextOutput(ns("linelist"))
         ),
         select = TRUE
@@ -210,11 +239,12 @@ mod_compare_data_server <- function(input, output, session){
       appendTab(
         inputId = "tabs",
         tabPanel(
-          title = "compareDF::compare_df", #icon = icon("home"),
+          title = "Compare DF", #icon = icon("home"),
           column(width = 3, 
                  includeMarkdown(system.file("app", "www", "colour_guide.md", package = "datacomparator")),
                  mod_export_html_ui(ns("export_compare_df"))),
-          column(width = 9, style = 'overflow-x: scroll', htmlOutput(ns("compareDF")))
+          column(width = 9, style = 'overflow-x: scroll', 
+                 htmlOutput(ns("compareDF")) %>% shinycssloaders::withSpinner())
         )
       )
       
@@ -244,11 +274,12 @@ mod_compare_data_server <- function(input, output, session){
           column(width = 3, 
                  includeMarkdown(system.file("app", "www", "colour_guide.md", package = "datacomparator")),
                  mod_export_html_ui(ns("export_compare_duplicates"))),
-          column(width = 9, style = 'overflow-x: scroll', htmlOutput(ns("compare_dups")))
+          column(width = 9, style = 'overflow-x: scroll', 
+                 htmlOutput(ns("compare_dups")) %>% shinycssloaders::withSpinner())
         )
       )
     } else if (input$go > 1) {
-      updateTabsetPanel(session, "tabs", selected = "linelist::compare_data")
+      updateTabsetPanel(session, "tabs", selected = "Summary")
     }
   })
   

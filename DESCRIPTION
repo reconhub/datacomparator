@@ -16,5 +16,7 @@ Imports:
     shinyjs,
     dplyr,
     DT,
-    shinythemes
+    shinythemes,
+    shinyWidgets,
+    shinycssloaders
 RoxygenNote: 6.1.1
