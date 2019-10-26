@@ -51,8 +51,6 @@ To update
 This project is currently only a concept. We are currently looking for
 volunteers to help :)
 
-Paul Campbell from [Epicentre MSF](https://epicentre.msf.org/en/acceuil)
-
 ---
  
 Please note that the 'datacomparator' project is released with a
