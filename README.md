@@ -22,11 +22,21 @@ versions of a given dataset. The app will allow:
 
 ## Installation
 
+First, install the `remotes` package:
+
+```r
+install.packages("remotes")
+```
+
+Use `remotes` to install `datacomparator`:
+
 ```r
 remotes::install_github("paulc91/datacomparator")
 ```
 
 ## App Instructions
+
+To launch the shiny app:
 
 ```r
 datacomparator::run_app()
@@ -34,10 +44,13 @@ datacomparator::run_app()
 
 ## Potential data security concerns
 
+
 ## Contributors and collaborators
 
 This project is currently only a concept. We are currently looking for
 volunteers to help :)
+
+Paul Campbell from [Epicentre MSF](https://epicentre.msf.org/en/acceuil)
 
 ---
  
