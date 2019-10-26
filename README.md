@@ -5,6 +5,8 @@
   [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- badges: end -->
 
+## Introduction
+
 This project aims to provide a shiny app for comparing different (dated)
 versions of a given dataset. The app will allow:
 
@@ -18,7 +20,21 @@ versions of a given dataset. The app will allow:
 
 * to visualise **changes in duplicates**
 
-## Contributors
+## Installation
+
+```r
+remotes::install_github("paulc91/datacomparator")
+```
+
+## App Instructions
+
+```r
+datacomparator::run_app()
+```
+
+## Potential data security concerns
+
+## Contributors and collaborators
 
 This project is currently only a concept. We are currently looking for
 volunteers to help :)
